@@ -351,26 +351,56 @@
     </footer>
 
     <script>
-        function toggleMenu() {
-            const navLinks = document.getElementById('nav-links');
+         function toggleMenu() {
+            var navLinks = document.getElementById('nav-links');
             navLinks.classList.toggle('show');
         }
 
-        const sections = document.querySelectorAll('.section');
-        window.addEventListener('scroll', checkSections);
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.section');
 
-        function checkSections() {
-            const triggerBottom = window.innerHeight / 5 * 4;
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('morph');
+                    } else {
+                        entry.target.classList.remove('morph'); // Optional: remove class when out of view
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
 
             sections.forEach(section => {
-                const sectionTop = section.getBoundingClientRect().top;
-                if (sectionTop < triggerBottom) {
-                    section.classList.add('morph');
-                } else {
-                    section.classList.remove('morph');
-                }
+                observer.observe(section);
             });
-        }
+
+            // To animate sections on page reload
+            window.addEventListener('load', () => {
+                sections.forEach(section => {
+                    if (isElementInViewport(section)) {
+                        section.classList.add('morph');
+                    }
+                });
+            });
+
+            // Helper function to check if element is in viewport on load
+            function isElementInViewport(el) {
+                const rect = el.getBoundingClientRect();
+                return (
+                    rect.top >= 0 &&
+                    rect.left >= 0 &&
+                    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                );
+            }
+        });
     </script>
 </body>
 </html>
